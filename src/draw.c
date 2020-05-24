@@ -15,7 +15,7 @@ void draw_level(const level *lvl){
     }
 }
 
-void draw_state(const level *lvl, const state *sta){
+void draw_state(const level *lvl, const state *sta, Texture2D sprite_bullet, Texture2D Sprite, Texture2D sprite_BRUTE, Texture2D sprite_MINION, Rectangle frameRec, Rectangle *frameRec_B, Rectangle *frameRec_M, int *currentFrame_E, int *framesCounter_E){
 
     // Initialize a camera to be used as drawing context
     Camera2D cam;
@@ -35,18 +35,32 @@ void draw_state(const level *lvl, const state *sta){
 
     // Draw level
     draw_level(lvl);
-
-    // Draw enemies
+    
     for(int i=0;i<sta->n_enemies;i++){
         // Get a copy of the enemy entity
         entity ent = sta->enemies[i].ent;
         // Initialize a Vector2 that represents the center of the entity position
-        Vector2 vec = {ent.x,ent.y};
-        // Draw a circle with the radius of the entity, color depends on the enemy type
+        Vector2 vec = {ent.x,ent.y};  
+        //Draw enemies depending on the type
         if(sta->enemies[i].kind == MINION){
-            DrawCircleV(vec,ent.rad,YELLOW);
-        }else{
-            DrawCircleV(vec,ent.rad,RED);
+         
+            if (*framesCounter_E >= (60/FRAME_SPEED))
+            {
+                
+                (*framesCounter_E) = 0;
+                (*currentFrame_E)++;
+                
+                if (*currentFrame_E > 5) *currentFrame_E = 0;
+
+                frameRec_M->x = (float)*currentFrame_E*(float)sprite_MINION.width/4;
+            }
+            DrawTextureRec(sprite_MINION, *frameRec_M, vec, WHITE); 
+        }
+        else{
+            if (*currentFrame_E > 5) *currentFrame_E = 0;
+
+            frameRec_B->x = (float)*currentFrame_E*(float)sprite_BRUTE.width/4;
+            DrawTextureRec(sprite_BRUTE, *frameRec_B, vec, WHITE); 
         }
     }
 
@@ -56,8 +70,8 @@ void draw_state(const level *lvl, const state *sta){
         entity ent = sta->pla.ent;
         // Initialize a Vector2 that represents the center of the entity position
         Vector2 vec = {ent.x,ent.y};
-        // Draw a circle with the radius of the entity
-        DrawCircleV(vec,ent.rad,BLUE);
+        //Draws the player texture according to the frames according to the player's speed
+        DrawTextureRec(Sprite, frameRec, vec, WHITE); 
     }
 
     // Draw bullets
@@ -66,8 +80,8 @@ void draw_state(const level *lvl, const state *sta){
         entity ent = sta->bullets[i].ent;
         // Initialize a Vector2 that represents the center of the entity position
         Vector2 vec = {ent.x,ent.y};
-        // Draw a circle with the radius of the entity
-        DrawCircleV(vec,ent.rad,PINK);
+        // Draw the sprite that represents the bullets
+        DrawTextureV(sprite_bullet, vec, WHITE);   
     }
 
     // Stop drawing relative to the camera
